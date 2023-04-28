@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="420.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ignotus.GUI.ControllerChat">
+   <children>
+      <HBox alignment="CENTER_LEFT" prefHeight="80.0" prefWidth="300.0" spacing="20.0" style="-fx-border-color: #000000; -fx-border-width: 2;">
+         <children>
+            <Circle fill="DODGERBLUE" radius="25.0" stroke="TRANSPARENT" strokeType="INSIDE" />
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+         </children>
+         <padding>
+            <Insets left="20.0" />
+         </padding>
+      </HBox>
+      <VBox layoutX="93.0" layoutY="80.0" prefHeight="290.0" prefWidth="300.0" AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80.0" />
+      <HBox alignment="CENTER" layoutX="50.0" layoutY="320.0" prefHeight="50.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <TextField prefHeight="26.0" prefWidth="221.0" />
+            <Button mnemonicParsing="false" text="Send" />
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>
