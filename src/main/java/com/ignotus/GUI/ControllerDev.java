@@ -21,12 +21,11 @@ public class ControllerDev {
     Text errorField;
 
     @FXML
-    void addUser() throws IOException {
+    void addUser() throws IOException, InterruptedException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("selection-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 300, 500);
 
         for (ControllerClient clientCtrl: clientCtrlArray) {
-            System.out.println(clientCtrl.client.username);
             if (Objects.equals(clientCtrl.client.username, userField.getText())) {
                 errorField.setText("username in use");
                 throw new RuntimeException("username in use");
@@ -36,15 +35,21 @@ public class ControllerDev {
 
 
         ControllerClient clientController = fxmlLoader.getController();
+
+        Client newClient = new Client("localhost",4200, userField.getText());
+        clientController.setClient(newClient);
         clientController.loadChats(clientCtrlArray);
 
-        Client newClient = new Client("localhost",4200);
-        newClient.username = userField.getText();
+        for (ControllerClient ctr: clientCtrlArray){
+            ctr.addChat(newClient.username);
+        }
         clientCtrlArray.add(clientController);
 
 
-
         Stage stage = new Stage();
+        clientController.setStage(stage);
+        clientController.setScene(scene);
+        clientController.controllerChat.setControllerClient(clientController);
         stage.setTitle(userField.getText());
         stage.setScene(scene);
         stage.show();

@@ -12,20 +12,23 @@ public class Client {
     private PrintWriter writer;
     private BufferedReader reader;
 
-    //https://www.baeldung.com/a-guide-to-java-sockets
-    //https://www.youtube.com/watch?v=_1nqY-DKP9A
-
-    public Client (String ip, int port) throws IOException {
+    public Client (String ip, int port, String username) throws IOException {
+        this.username = username;
         clientSocket = new Socket(ip, port);
         writer = new PrintWriter(clientSocket.getOutputStream(), true);
         reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
     }
 
-    public String sendMessage(String msg) throws IOException {
+    public void sendMessage(String msg) {
         writer.println(msg);
-        String resp = reader.readLine();
-        return resp;
+    }
+
+    public String readMessage(){
+        try {
+            return reader.readLine();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void stop() throws IOException {

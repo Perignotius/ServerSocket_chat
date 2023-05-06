@@ -1,14 +1,16 @@
 package com.ignotus.chats;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class Server extends Thread{
     final static int port = 4200;
+    private Map<String, Socket> socketMap = new HashMap<>();
     private ServerSocket serverSocket;
 
     @Override
@@ -19,22 +21,47 @@ public class Server extends Thread{
             throw new RuntimeException(e);
         }
 
-        while (true) {
+        while (!serverSocket.isClosed()) {
             try {
-                Socket clientSocket = serverSocket.accept();
-                new ServerClientThread(clientSocket).start();
+                Socket newClientSocket = serverSocket.accept();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(newClientSocket.getInputStream()));
+
+                Thread thread;
+                if (Objects.equals(reader.readLine(), "/group")){
+                    thread = new Thread(new ServerGroupThread(newClientSocket));
+                } else {
+                    thread = new Thread(new ServerClientThread(newClientSocket));
+                }
+
+                thread.start();
+            } catch (java.net.SocketException e){
+                if (Objects.equals(e.getMessage(), "Socket closed")) {
+                    System.out.println("Server terminated");
+                }
+                else {
+                    throw new RuntimeException(e);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void stopServer() throws IOException {
-        serverSocket.close();
+    public void stopServer() {
+        try {
+            serverSocket.close();
+            for (Map.Entry entry: socketMap.entrySet()){
+                Socket socket = (Socket) entry.getValue();
+                socket.close();
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
-    private static class ServerClientThread extends Thread{
-        private ServerSocket serverSocket;
+    private class ServerClientThread implements Runnable{
         private Socket clientSocket;
         private PrintWriter writer;
         private BufferedReader reader;
@@ -44,23 +71,109 @@ public class Server extends Thread{
         @Override
         public void run() {
             try {
-                writer = new PrintWriter(clientSocket.getOutputStream(), true);
                 reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
                 String input;
-                while ((input = reader.readLine()) != null) {
-                    writer.println(input);
+                String[] arr;
+                while (true) {
+                    input = reader.readLine();
+                    arr = input.split(" ",-1);
+                    // nustato varda dabartinio socket
+                    if (Objects.equals(arr[0], "/name")) {
+                        socketMap.put(arr[1], clientSocket);
+                    }
+                    // prisijungia prie output socket
+                    else if (Objects.equals(arr[0], "/connect")){
+                        writer = new PrintWriter(socketMap.get(arr[1]).getOutputStream(), true);
+                    }
+                    else if (Objects.equals(arr[0], "/disconnect" ) || serverSocket.isClosed()) {
+                        reader.close();
+                        writer.close();
+                        clientSocket.close();
+                        return;
+                    }
+                    else if (writer != null){
+                        writer.println(input);
+                    }
                 }
 
+            }
+            catch (java.net.SocketException e){
+                if (Objects.equals(e.getMessage(), "Socket closed")) {
+                    System.out.println("Client terminated");
+                }
+                else {
+                    throw new RuntimeException(e);
+                }
+            }
+            catch (IOException e){
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        public void stop () {
+            try {
                 reader.close();
                 writer.close();
                 clientSocket.close();
-            }
-            catch (IOException e){
-                System.out.println(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
         }
     }
+
+    private class ServerGroupThread implements Runnable{
+        private Socket groupSocket;
+        private HashMap<String, PrintWriter> writerList;
+        private BufferedReader reader;
+        public ServerGroupThread (Socket groupSocket) {this.groupSocket = groupSocket;}
+        @Override
+        public void run() {
+            try {
+                writerList = new HashMap<>();
+                reader = new BufferedReader(new InputStreamReader(groupSocket.getInputStream()));
+
+                String input;
+                String[] arr;
+                while (true) {
+                    //i grupe zinutes siust group~name~message pavidalu
+                    input = reader.readLine();
+                    arr = input.split(" ",-1);
+                    // nustato varda dabartinio socket
+                    if (Objects.equals(arr[0], "/name")) {
+                        socketMap.put(arr[1], groupSocket);
+                    }
+                    // prisijungia prie output socket
+                    else if (Objects.equals(arr[0], "/connect")){
+                        PrintWriter writer = new PrintWriter(socketMap.get(arr[1]).getOutputStream(), true);
+                        writerList.put(arr[1], writer);
+                        writer.println("/groupAdded " + arr[2]);
+                    }
+                    else {
+                        arr = input.split("~",-1);
+                        for (Map.Entry<String, PrintWriter> writer: writerList.entrySet()){
+                            if (!Objects.equals(arr[1], writer.getKey()))
+                                writer.getValue().println(arr[1] + "~" + arr[0] + "~" + arr[2]);
+                        }
+                    }
+                }
+
+            }
+            catch (java.net.SocketException e){
+                if (Objects.equals(e.getMessage(), "Socket closed")) {
+                    System.out.println("Group terminated");
+                }
+                else {
+                    throw new RuntimeException(e);
+                }
+            }
+            catch (IOException e){
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 }
 
