@@ -1,6 +1,5 @@
 package com.ignotus.GUI;
 
-import com.ignotus.chats.Client;
 import com.ignotus.chats.Server;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -13,12 +12,6 @@ import javafx.stage.WindowEvent;
 import java.io.IOException;
 
 // @Justas Balčiūnas
-
-/*
-trūkumai:
- * grupes sukuriamos kuriancio vartotojo puseje, ne serveryje, todel jei tas vartotojas atsijungia, gruopes nebeveikia...
- * nauji vartotojai uzkraunami per ControlerDev, todel pridejus nauja vartotoja kitame kompiuteryje jis neatsiras sarase...
-*/
 
 //https://www.baeldung.com/a-guide-to-java-sockets
 //https://www.youtube.com/watch?v=_1nqY-DKP9A
@@ -49,3 +42,10 @@ public class Main extends Application {
         launch();
     }
 }
+
+
+/*
+trūkumai:
+ * grupes sukuriamos kuriancio vartotojo puseje, ne serveryje, todel jei tas vartotojas atsijungia, gruopes nebeveikia...
+ * nauji vartotojai uzkraunami per ControlerDev, todel pridejus nauja vartotoja kitame kompiuteryje jis neatsiras sarase...
+*/

@@ -4,20 +4,11 @@ import com.ignotus.chats.Client;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-
-import java.io.PrintWriter;
 import java.util.*;
 
 public class ControllerChat {
@@ -97,8 +88,10 @@ public class ControllerChat {
         }
         public String readMessage() {
             String msg = client.readMessage();
+            if (msg == null)
+                return null;
 
-            String arr[];
+            String[] arr;
             arr = msg.split(" ",-1);
             if (Objects.equals(arr[0], "/groupAdded")){
                 String name = arr[1];
@@ -112,7 +105,6 @@ public class ControllerChat {
 
             } else {
                 //gauna receiver~sender~msg
-                System.out.println("received" + msg);
                 arr = msg.split("~",-1);
                 Label label = new Label(arr[2]);
                 Label name = new Label(arr[0] + ":");
